@@ -1,0 +1,64 @@
+{% extends 'ipl/base.html' %}
+
+{% block title %}IPL 2026 — All Teams{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+    <div class="page-hero-inner">
+        <h1>IPL <span>Teams</span></h1>
+        <p>{{ total_teams }} franchises competing in IPL 2026</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="grid-3">
+        {% for team in teams %}
+        <div class="card animate-in" style="animation-delay:{{ forloop.counter0 }}00ms;">
+            <div style="height:6px; background:linear-gradient(90deg, {{ team.color }}, transparent);"></div>
+            <div style="padding:1.75rem; text-align:center;">
+                <div class="team-logo-circle" style="width:80px; height:80px; font-family:'Bebas Neue',sans-serif; font-size:1.1rem; letter-spacing:1px; margin:0 auto 1rem; border-color:{{ team.color }}40; color:var(--gold);">
+                    {% if team.logo %}
+                        <img src="{{ team.logo.url }}" alt="{{ team.name }}">
+                    {% else %}
+                        {{ team.name|slice:":3"|upper }}
+                    {% endif %}
+                </div>
+                <h3 style="font-family:'Bebas Neue',sans-serif; font-size:1.4rem; letter-spacing:2px; margin-bottom:4px;">{{ team.name }}</h3>
+                {% if team.city %}
+                <div style="font-size:0.8rem; color:var(--gray); letter-spacing:1px; margin-bottom:0.75rem;">📍 {{ team.city }}</div>
+                {% endif %}
+                {% if team.home_ground %}
+                <div style="font-size:0.8rem; color:var(--gray); margin-bottom:1rem;">🏟 {{ team.home_ground }}</div>
+                {% endif %}
+
+                <div style="display:flex; gap:1rem; justify-content:center; margin-bottom:1.25rem;">
+                    <div class="stat-box" style="flex:1; padding:0.75rem;">
+                        <div class="stat-value" style="font-size:1.8rem;">{{ team.players.count }}</div>
+                        <div class="stat-label">Players</div>
+                    </div>
+                    <div class="stat-box" style="flex:1; padding:0.75rem;">
+                        <div class="stat-value" style="font-size:1.8rem;">{{ team.home_matches.count|add:team.away_matches.count }}</div>
+                        <div class="stat-label">Matches</div>
+                    </div>
+                </div>
+
+                {% if team.description %}
+                <p style="font-size:0.85rem; color:var(--gray); line-height:1.6; font-family:'Inter',sans-serif; font-weight:300; margin-bottom:1.25rem;">{{ team.description|truncatechars:100 }}</p>
+                {% endif %}
+
+                <div style="display:flex; gap:8px; justify-content:center;">
+                    <a href="{% url 'team_detail' team.slug %}" class="btn btn-outline" style="flex:1; justify-content:center;">View Team</a>
+                    <a href="{% url 'player_list' %}?team={{ team.slug }}" class="btn btn-ghost" style="flex:1; justify-content:center;">Squad</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div style="grid-column:1/-1; text-align:center; padding:4rem;">
+            <div style="font-size:4rem; margin-bottom:1rem;">🏏</div>
+            <h2 style="font-family:'Bebas Neue',sans-serif; font-size:2rem; color:var(--gold); letter-spacing:3px;">No Teams Yet</h2>
+            <p style="color:var(--gray);">Teams will be added via the admin panel.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

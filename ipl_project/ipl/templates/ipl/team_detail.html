@@ -1,0 +1,114 @@
+{% extends 'ipl/base.html' %}
+
+{% block title %}{{ team.name }} — IPL 2026{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+    <div class="page-hero-inner">
+        <div style="margin-bottom:0.75rem;">
+            <a href="{% url 'team_list' %}" style="color:var(--gray); text-decoration:none; font-size:0.85rem; letter-spacing:1px;">← All Teams</a>
+        </div>
+        <h1>{{ team.name }}</h1>
+        {% if team.city %}<p>📍 {{ team.city }} {% if team.home_ground %}&bull; 🏟 {{ team.home_ground }}{% endif %}</p>{% endif %}
+    </div>
+</div>
+
+<div class="container">
+    {% if team.description %}
+    <div class="card animate-in" style="padding:1.5rem; margin-bottom:2rem; border-left:3px solid var(--gold);">
+        <p style="color:var(--off-white); font-family:'Inter',sans-serif; font-weight:300; font-size:1rem; line-height:1.7;">{{ team.description }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Stats -->
+    <div class="grid-4 animate-in animate-delay-1" style="margin-bottom:2rem;">
+        <div class="stat-box">
+            <div class="stat-value">{{ players|length }}</div>
+            <div class="stat-label">Players</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-value">{{ team.home_matches.count|add:team.away_matches.count }}</div>
+            <div class="stat-label">Matches</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-value">
+                {% with total=0 %}
+                    {% for p in players %}{% if p.runs %}{{ p.runs|add:total }}{% endif %}{% endfor %}
+                {% endwith %}
+                —
+            </div>
+            <div class="stat-label">Total Runs</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-value">—</div>
+            <div class="stat-label">Wickets</div>
+        </div>
+    </div>
+
+    <!-- Players by Role -->
+    <div class="section-header animate-in animate-delay-2">
+        <div class="section-title">Team <span>Squad</span></div>
+    </div>
+    <div class="gold-line"></div>
+
+    {% regroup players by role as players_by_role %}
+    {% for role_group in players_by_role %}
+    <div style="margin-bottom:2rem;" class="animate-in">
+        <h3 style="font-family:'Bebas Neue',sans-serif; font-size:1.3rem; letter-spacing:2px; color:var(--gray); margin-bottom:1rem; text-transform:uppercase;">
+            {% if role_group.grouper == 'Batsman' %}🏏{% elif role_group.grouper == 'Bowler' %}🎯{% elif role_group.grouper == 'All-rounder' %}⚡{% else %}🧤{% endif %}
+            {{ role_group.grouper }}s
+        </h3>
+        <div class="grid-3" style="gap:1rem;">
+            {% for player in role_group.list %}
+            <div class="card" style="padding:1.25rem; display:flex; align-items:center; gap:12px;">
+                <div style="width:48px; height:48px; border-radius:50%; background:linear-gradient(135deg,var(--navy-light),var(--navy-mid)); border:2px solid rgba(255,215,0,0.2); display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:1.1rem; color:var(--gold); flex-shrink:0;">
+                    {{ player.name|slice:":1"|upper }}
+                </div>
+                <div style="flex:1; min-width:0;">
+                    <div style="font-weight:700; font-size:0.95rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ player.name }}</div>
+                    <div style="font-size:0.72rem; color:var(--gray);">{{ player.nationality|default:"Indian" }}</div>
+                </div>
+                <div style="text-align:right; flex-shrink:0;">
+                    {% if player.runs %}<div style="font-size:0.8rem; color:var(--gold);">🏏 {{ player.runs }}</div>{% endif %}
+                    {% if player.wickets %}<div style="font-size:0.8rem; color:var(--gray-light);">🎯 {{ player.wickets }}</div>{% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% empty %}
+    <div style="text-align:center; padding:3rem; border:1px dashed rgba(255,215,0,0.15); border-radius:12px;">
+        <p style="color:var(--gray);">No players added to this team yet.</p>
+    </div>
+    {% endregroup %}
+
+    <!-- Recent Matches -->
+    {% with home_matches=team.home_matches.all away_matches=team.away_matches.all %}
+    {% if home_matches or away_matches %}
+    <div class="section-header" style="margin-top:2rem;">
+        <div class="section-title">Recent <span>Matches</span></div>
+        <a href="{% url 'match_list' %}" class="btn btn-ghost" style="font-size:0.8rem;">All Matches →</a>
+    </div>
+    <div class="gold-line"></div>
+    <div style="display:flex; flex-direction:column; gap:0.75rem;">
+        {% for match in home_matches|slice:":3" %}
+        <div class="card" style="padding:1rem 1.25rem;">
+            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem;">
+                <div>
+                    <div style="font-weight:700;">{{ match.title }}</div>
+                    <div style="font-size:0.78rem; color:var(--gray);">{{ match.match_date|date:"d M Y" }} &bull; {{ match.venue }}</div>
+                </div>
+                <div style="display:flex; align-items:center; gap:1rem;">
+                    {% if match.status == 'Completed' %}<span class="badge badge-completed">✓</span>
+                    {% elif match.status == 'Live' %}<span class="badge badge-live"><span class="live-dot"></span>LIVE</span>
+                    {% else %}<span class="badge badge-upcoming">Upcoming</span>{% endif %}
+                    <a href="{% url 'match_detail' match.slug %}" class="btn btn-outline" style="padding:5px 12px; font-size:0.78rem;">View</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+</div>
+{% endblock %}

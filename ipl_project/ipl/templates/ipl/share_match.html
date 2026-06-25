@@ -1,0 +1,102 @@
+{% extends 'ipl/base.html' %}
+
+{% block title %}Share {{ match.title }} — IPL 2026{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+    <div class="page-hero-inner">
+        <div style="margin-bottom:0.75rem;">
+            <a href="{% url 'match_detail' match.slug %}" style="color:var(--gray); text-decoration:none; font-size:0.85rem; letter-spacing:1px;">← Back to Match</a>
+        </div>
+        <h1>Share <span>Match</span></h1>
+        <p>Send this match to a friend via email</p>
+    </div>
+</div>
+
+<div class="container">
+    <div style="max-width:680px; margin:0 auto;">
+
+        <!-- Match Preview -->
+        <div class="card animate-in" style="margin-bottom:1.5rem;">
+            <div style="padding:1.5rem; border-bottom:1px solid rgba(255,215,0,0.08);">
+                <div style="font-size:0.7rem; color:var(--gray); letter-spacing:2px; text-transform:uppercase; margin-bottom:8px;">Sharing This Match</div>
+                <div style="font-family:'Bebas Neue',sans-serif; font-size:1.6rem; letter-spacing:2px; color:var(--white);">
+                    {{ match.team1.name }} <span style="color:var(--gold);">VS</span> {{ match.team2.name }}
+                </div>
+                <div style="display:flex; gap:1rem; margin-top:0.75rem; flex-wrap:wrap;">
+                    <span style="font-size:0.85rem; color:var(--gray);">📅 {{ match.match_date|date:"d M Y, H:i" }} IST</span>
+                    <span style="font-size:0.85rem; color:var(--gray);">📍 {{ match.venue }}</span>
+                    <span>
+                        {% if match.status == 'Completed' %}
+                            <span class="badge badge-completed">✓ Completed</span>
+                        {% elif match.status == 'Live' %}
+                            <span class="badge badge-live"><span class="live-dot"></span> LIVE</span>
+                        {% else %}
+                            <span class="badge badge-upcoming">Upcoming</span>
+                        {% endif %}
+                    </span>
+                </div>
+                {% if match.result %}
+                <div class="result-bar" style="margin-top:1rem;">🏆 {{ match.result }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Share Form -->
+        <div class="card animate-in animate-delay-2" style="padding:2rem;">
+            <h2 style="font-family:'Bebas Neue',sans-serif; font-size:1.8rem; letter-spacing:3px; color:var(--gold); margin-bottom:0.25rem;">📤 Share Via Email</h2>
+            <p style="color:var(--gray); font-size:0.9rem; margin-bottom:1.5rem;">Fill in the details below to send match info to your friend.</p>
+
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="grid-2" style="gap:1rem;">
+                    <div class="form-group">
+                        <label class="form-label">Your Name</label>
+                        {{ form.your_name }}
+                        {% if form.your_name.errors %}
+                            <span style="color:#FF6B6B; font-size:0.8rem;">{{ form.your_name.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Your Email</label>
+                        {{ form.your_email }}
+                        {% if form.your_email.errors %}
+                            <span style="color:#FF6B6B; font-size:0.8rem;">{{ form.your_email.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Friend's Email</label>
+                    {{ form.friend_email }}
+                    {% if form.friend_email.errors %}
+                        <span style="color:#FF6B6B; font-size:0.8rem;">{{ form.friend_email.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Personal Message <span style="color:var(--gray); font-weight:400; letter-spacing:0px;">(optional)</span></label>
+                    {{ form.message }}
+                    {% if form.message.errors %}
+                        <span style="color:#FF6B6B; font-size:0.8rem;">{{ form.message.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <div style="display:flex; gap:1rem; margin-top:0.5rem;">
+                    <button type="submit" class="btn btn-gold">📧 Send Email</button>
+                    <a href="{% url 'match_detail' match.slug %}" class="btn btn-ghost">Cancel</a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Info Note -->
+        <div style="background:rgba(255,215,0,0.04); border:1px solid rgba(255,215,0,0.1); border-radius:10px; padding:1rem 1.25rem; margin-top:1rem; display:flex; gap:10px; align-items:flex-start;">
+            <span style="font-size:1.2rem;">ℹ️</span>
+            <p style="color:var(--gray); font-size:0.85rem; line-height:1.6;">
+                Your friend will receive an email with match details including teams, date, venue, and a direct link to view the full match page. Your email address will be included so they know who sent it.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
